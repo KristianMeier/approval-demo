@@ -1,0 +1,308 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: approval_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: approvals
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - approval_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U approval_user -d approvals"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://approval_user:secure_password@postgres/approvals
+      SECRET_KEY: your_secret_key_change_this_in_production
+      ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - approval_network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "127.0.0.1:4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - approval_network
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start
+
+networks:
+  approval_network:
+    driver: bridge
+    internal: false
+
+volumes:
+  postgres_data:
+    driver: local
+
+---
+# .env
+# Database Configuration
+DB_USER=approval_user
+DB_PASSWORD=secure_password
+DB_NAME=approvals
+
+# Security Configuration
+SECRET_KEY=your_very_secure_secret_key_here_change_this_in_production
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+# Application Configuration
+ENVIRONMENT=development
+DEBUG=true
+
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:4200,https://localhost:4200
+
+# Logging Configuration
+LOG_LEVEL=INFO
+LOG_FILE=/app/logs/application.log
+
+# Database Connection Pool
+DB_POOL_SIZE=10
+DB_MAX_OVERFLOW=20
+
+# WebSocket Configuration
+WS_HEARTBEAT_INTERVAL=30
+
+# On-Premise Security Settings
+ENABLE_RATE_LIMITING=true
+MAX_REQUESTS_PER_MINUTE=100
+SESSION_TIMEOUT_MINUTES=60
+
+# File Upload Settings (for future use)
+MAX_FILE_SIZE_MB=10
+ALLOWED_FILE_TYPES=pdf,doc,docx,jpg,png
+
+# Notification Settings
+EMAIL_ENABLED=false
+SLACK_ENABLED=false
+WEBHOOK_TIMEOUT_SECONDS=10
+
+# Audit and Compliance
+AUDIT_LOG_RETENTION_DAYS=2555  # 7 years for government compliance
+ENABLE_DETAILED_AUDIT=true
+GDPR_COMPLIANCE=true
+
+# Backup Configuration
+AUTO_BACKUP_ENABLED=false
+BACKUP_RETENTION_DAYS=90
+
+---
+# .gitignore
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+.dockerignore
+
+# Database
+*.db
+*.sqlite
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Angular
+dist/
+tmp/
+out-tsc/
+
+# Python
+*.egg-info/
+build/
+dist/
+
+# Backup files
+*.bak
+*.backup
+
+---
+# .dockerignore
+# Version control
+.git/
+.gitignore
+
+# Dependencies (will be installed in container)
+node_modules/
+__pycache__/
+
+# Development files
+*.md
+.vscode/
+.idea/
+
+# Logs and temporary files
+logs/
+*.log
+tmp/
+
+# Environment files (handled separately)
+.env.local
+.env.development.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+out-tsc/
+
+# Test files
+coverage/
+*.test.js
+*.spec.js
+
+---
+# README.md
+# Politisk Godkendelsessystem
+
+Et sikkert, on-premise godkendelsessystem bygget til politiske kontorer og statslige institutioner.
+
+## 🏛️ Funktioner
+
+- **Real-time godkendelser** med WebSocket notifikationer
+- **Sikker on-premise deployment** - ingen cloud afhængigheder
+- **Audit trail** - komplet sporbarhed af alle beslutninger
+- **Rolle-baseret adgang** - forskellige rettigheder per bruger
+- **Prioritetsbaseret routing** - kritiske sager behandles først
+- **Dansk interface** - tilpasset danske politiske workflows
+
+## 🚀 Hurtig Start
+
+```bash
+# 1. Klon projektet
+git clone [repository-url]
+cd approval-demo
+
+# 2. Start systemet
+docker-compose up --build
+
+# 3. Åbn browser
+# Frontend: http://localhost:4200
+# API: http://localhost:8000/docs
+```
+
+## 🛡️ Sikkerhed
+
+- **Database kryptering** - Sensitive data krypteres
+- **Session management** - Automatisk timeout
+- **Rate limiting** - Beskyttelse mod angreb
+- **Audit logging** - Komplet aktivitetslog
+- **GDPR compliance** - Overholder databeskyttelse
+
+## 📊 Kapacitet
+
+- **50+ godkendelser/dag** - Optimeret til små-mellemstore kontorer
+- **Real-time opdateringer** - Øjeblikkelige notifikationer
+- **Skalerbar arkitektur** - Kan udvides efter behov
+
+## 🔧 Teknologi Stack
+
+- **Backend**: FastAPI (Python)
+- **Frontend**: Angular (TypeScript)
+- **Database**: PostgreSQL
+- **Real-time**: WebSockets
+- **Deployment**: Docker Compose
+
+## 📋 Krav
+
+- Docker & Docker Compose
+- 2GB RAM minimum
+- Node.js 18+ (til udvikling)
+- Python 3.11+ (til udvikling)
+
+## 📞 Support
+
+For teknisk support og tilpasninger, kontakt systemadministrator.
+
+---
+**Bygget til dansk politik - Sikkerhed først** 🇩🇰
