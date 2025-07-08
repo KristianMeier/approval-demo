@@ -2,6 +2,9 @@
 
 Et sikkert, on-premise godkendelsessystem til politiske kontorer med real-time notifikationer og komplet audit trail.
 
+# Prompt link
+https://claude.ai/chat/ef9104e0-6985-4775-bf67-28dcc77b2d28
+
 ## 📚 Filstruktur og Navigation
 
 | Fil | Formål | Hvornår |
