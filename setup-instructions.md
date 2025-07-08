@@ -40,46 +40,6 @@ approval-demo/
     │           └── create-request.component.ts
 ```
 
-## 🛠️ Setup Instruktioner
-
-### Trin 1: Installer Angular CLI
-```bash
-npm install -g @angular/cli
-```
-
-### Trin 2: Opret projekt struktur
-```bash
-mkdir approval-demo
-cd approval-demo
-
-# Opret Angular projekt
-ng new frontend --routing=false --style=css --skip-git
-
-# Opret backend struktur
-mkdir -p backend/app
-mkdir logs
-```
-
-### Trin 3: Generer Angular komponenter
-```bash
-cd frontend
-
-# Generer services og komponenter
-ng generate service services/approval --skip-tests
-ng generate component components/approval-list --skip-tests
-ng generate component components/create-request --skip-tests
-
-# Opret models mappe
-mkdir src/app/models
-
-cd ..
-```
-
-### Trin 4: Kopier alle filer
-- Kopier filer fra Artefakt 2 (Docker & Config)
-- Kopier filer fra Artefakt 3 (Backend)
-- Kopier filer fra Artefakt 4 (Frontend)
-
 ## 🚀 Start Systemet
 
 ### Trin 1: Start med Docker
