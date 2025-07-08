@@ -46,19 +46,6 @@
 - 🔍 **Filtrering og søgning** - Hurtig navigation i anmodninger
 - 📱 **Responsiv design** - Fungerer på desktop, tablet og mobil
 
-### **5. Offline Deployment** ✅
-- 🏗️ **Build på udvikling** - Færdige images til produktion
-- 📦 **Image packaging** - Alt-i-en deployment strategi
-- 🚚 **Copy-deploy workflow** - Simpel overførsel til produktion
-- 🔒 **Zero internet dependency** - Komplet offline drift
-
-### **6. Offline Development Cache** ✅
-- 📥 **Download alt strategy** - Cache alle dependencies
-- 🐍 **Python pakke cache** - Offline pip installs
-- 🌐 **Node.js pakke cache** - Offline npm builds
-- 🐳 **Docker image cache** - Lokale base images
-- 🔄 **Reproducible builds** - Konsistente miljøer
-
 ## 🎯 **System Karakteristika**
 
 ### **Sikkerhed Først** 🛡️
@@ -91,35 +78,10 @@
 
 ## 🚀 **Deployment Strategier**
 
-### **Option 1: Standard Online Deployment**
+### **Deployment**
 ```bash
-# Fra Artefakt 1-4
 docker-compose up --build
 ```
-- 🟢 **Fordele**: Simpel, automatisk builds
-- 🔴 **Ulemper**: Kræver internet på produktion
-
-### **Option 2: Offline Production (Anbefalet)**
-```bash
-# Udvikling (med internet)
-./build-for-production.sh
-
-# Produktion (offline)
-./load-images.sh && docker-compose -f docker-compose.prod.yml up -d
-```
-- 🟢 **Fordele**: Sikker, ingen internet på prod, hurtige deployments
-- 🟡 **Kompleksitet**: Kræver image management
-
-### **Option 3: Fuld Offline Development**
-```bash
-# Setup (med internet)
-./download-everything.sh
-
-# Udvikling (offline)
-./build-offline.sh
-```
-- 🟢 **Fordele**: Komplet uafhængighed, reproducible builds
-- 🟡 **Setup**: Større initial cache download
 
 ## 📈 **Skaleringsmuligheder**
 

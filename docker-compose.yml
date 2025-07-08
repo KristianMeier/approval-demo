@@ -1,0 +1,66 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: approval_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: approvals
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - approval_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U approval_user -d approvals"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://approval_user:secure_password@postgres/approvals
+      SECRET_KEY: your_secret_key_change_this_in_production
+      ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - approval_network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "127.0.0.1:4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - approval_network
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start
+
+networks:
+  approval_network:
+    driver: bridge
+    internal: false
+
+volumes:
+  postgres_data:
+    driver: local
