@@ -1,5 +1,5 @@
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { App } from './app/app';
 
-platformBrowserDynamic().bootstrapModule(AppModule)
+bootstrapApplication(App)
   .catch(err => console.error('Fejl ved opstart af applikation:', err));
