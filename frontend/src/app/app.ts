@@ -1,329 +1,22 @@
+// src/app/app.ts
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { ApprovalService } from './services/approval';
-import { ApprovalListComponent } from './components/approval-list';
-import { CreateRequestComponent } from './components/create-request';
+import { ApprovalListComponent } from './components/approval-list/approval-list';
+import { CreateRequestComponent } from './components/create-request/create-request';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [CommonModule, HttpClientModule, ApprovalListComponent, CreateRequestComponent],
-  template: `
-    <div class="app-container">
-      <!-- Header -->
-      <header class="app-header">
-        <div class="container">
-          <div class="header-content">
-            <div class="logo-section">
-              <h1>🏛️ Politisk Godkendelsessystem</h1>
-              <p class="tagline">Sikker workflow til statslige institutioner</p>
-            </div>
-            
-            <div class="header-stats" *ngIf="systemStats">
-              <div class="stat-item">
-                <span class="stat-value">{{ systemStats.total_connections || 0 }}</span>
-                <span class="stat-label">Aktive forbindelser</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value">{{ pendingCount }}</span>
-                <span class="stat-label">Afventende</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Connection Status -->
-      <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
-        <span class="status-indicator"></span>
-        {{ connectionStatus }}
-      </div>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <div class="container">
-          
-          <!-- System Status Card -->
-          <div class="card" *ngIf="systemInfo">
-            <div class="card-header">
-              <h3 class="card-title">📊 System Status</h3>
-              <span class="badge" [class.badge-approved]="systemInfo.database === 'healthy'" 
-                    [class.badge-danger]="systemInfo.database !== 'healthy'">
-                {{ systemInfo.database === 'healthy' ? '✅ Operationel' : '❌ Fejl' }}
-              </span>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-3">
-                  <strong>Backend API:</strong><br>
-                  <small>{{ apiUrl }}</small>
-                </div>
-                <div class="col-3">
-                  <strong>Database:</strong><br>
-                  <small>PostgreSQL {{ systemInfo.database }}</small>
-                </div>
-                <div class="col-3">
-                  <strong>Real-time:</strong><br>
-                  <small>WebSocket {{ isConnected ? 'aktiv' : 'inaktiv' }}</small>
-                </div>
-                <div class="col-3">
-                  <strong>Sikkerhed:</strong><br>
-                  <small>100% On-premise</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Cards Row -->
-          <div class="row">
-            <div class="col-6">
-              <div class="card">
-                <div class="card-header">
-                  <h2 class="card-title">📝 Opret Ny Anmodning</h2>
-                </div>
-                <div class="card-body">
-                  <app-create-request (requestCreated)="onRequestCreated($event)"></app-create-request>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="card">
-                <div class="card-header">
-                  <h2 class="card-title">📋 Aktive Anmodninger</h2>
-                  <button class="btn btn-outline btn-sm" (click)="refreshData()">
-                    🔄 Opdater
-                  </button>
-                </div>
-                <div class="card-body">
-                  <app-approval-list #approvalList (statusChanged)="onStatusChanged($event)"></app-approval-list>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Activity -->
-          <div class="card" *ngIf="recentActivity.length > 0">
-            <div class="card-header">
-              <h3 class="card-title">⚡ Seneste Aktivitet</h3>
-              <small>Real-time opdateringer</small>
-            </div>
-            <div class="card-body">
-              <div class="activity-feed">
-                <div *ngFor="let activity of recentActivity | slice:0:5" class="activity-item">
-                  <span class="activity-time">{{ activity.timestamp | date:'short' }}</span>
-                  <span class="activity-message">{{ activity.message }}</span>
-                  <span class="activity-type badge" [class]="'badge-' + activity.type">
-                    {{ activity.type }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">🚀 Hurtig Test</h3>
-            </div>
-            <div class="card-body">
-              <p>Kom hurtigt i gang med systemet:</p>
-              <div class="d-flex gap-2">
-                <button class="btn btn-primary" (click)="createTestUsers()">
-                  👥 Opret Test Brugere
-                </button>
-                <button class="btn btn-secondary" (click)="createSampleRequest()">
-                  📄 Opret Eksempel Anmodning  
-                </button>
-                <button class="btn btn-warning" (click)="viewApiDocs()">
-                  📚 API Dokumentation
-                </button>
-              </div>
-              <small class="text-muted mt-2 d-block">
-                Disse funktioner hjælper dig med at teste systemet hurtigt
-              </small>
-            </div>
-          </div>
-
-        </div>
-      </main>
-
-      <!-- Footer -->
-      <footer class="app-footer">
-        <div class="container">
-          <div class="footer-content">
-            <div class="footer-section">
-              <strong>Politisk Godkendelsessystem v1.0</strong>
-              <small>Bygget til dansk politik - Sikkerhed først 🇩🇰</small>
-            </div>
-            <div class="footer-section">
-              <small>
-                <strong>Support:</strong> systemadministrator@institution.dk<br>
-                <strong>Status:</strong> {{ isConnected ? '🟢 Online' : '🔴 Offline' }}
-              </small>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  `,
-  styles: [`
-    .app-container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo-section h1 {
-      color: white;
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    .tagline {
-      margin: 0;
-      opacity: 0.9;
-      font-size: 1rem;
-    }
-
-    .header-stats {
-      display: flex;
-      gap: 20px;
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
-    .stat-value {
-      display: block;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      opacity: 0.8;
-    }
-
-    .connection-status {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .connection-status.connected {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .connection-status.disconnected {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .status-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-
-    .main-content {
-      flex: 1;
-      padding: 30px 0;
-    }
-
-    .activity-feed {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .activity-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .activity-time {
-      font-size: 0.8rem;
-      color: #666;
-      min-width: 120px;
-    }
-
-    .activity-message {
-      flex: 1;
-      margin: 0 12px;
-    }
-
-    .app-footer {
-      background: #2c3e50;
-      color: white;
-      padding: 20px 0;
-      margin-top: auto;
-    }
-
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .footer-section small {
-      display: block;
-      opacity: 0.8;
-    }
-
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 16px;
-        text-align: center;
-      }
-
-      .footer-content {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
-      }
-    }
-  `]
+  templateUrl: './app.html',
+  styleUrls: ['./app.css']
 })
 export class App implements OnInit, OnDestroy {
   @ViewChild('approvalList') approvalList!: ApprovalListComponent;
   
+  title = 'frontend';
   connectionStatus = 'Opretter forbindelse...';
   isConnected = false;
   apiUrl = 'http://localhost:8000';
@@ -435,16 +128,25 @@ export class App implements OnInit, OnDestroy {
   }
 
   private loadSystemInfo() {
-    // Note: These methods don't exist yet in ApprovalService, so we'll add them later
-    // For now, just mock the data
-    this.systemInfo = {
-      database: 'healthy',
-      status: 'running'
-    };
-    
-    this.systemStats = {
-      total_connections: 1
-    };
+    this.approvalService.getSystemHealth().subscribe({
+      next: (info) => {
+        this.systemInfo = info;
+        this.addActivity('System sundhedstjek gennemført', 'approved');
+      },
+      error: (error) => {
+        console.error('Fejl ved indlæsning af system info:', error);
+        this.addActivity('System sundhedstjek fejlede', 'rejected');
+      }
+    });
+
+    this.approvalService.getWebSocketStats().subscribe({
+      next: (stats) => {
+        this.systemStats = stats;
+      },
+      error: (error) => {
+        console.error('Fejl ved indlæsning af WebSocket stats:', error);
+      }
+    });
   }
 
   private startPeriodicUpdates() {
@@ -456,8 +158,14 @@ export class App implements OnInit, OnDestroy {
   }
 
   private updatePendingCount() {
-    // This will work when ApprovalService is properly implemented
-    this.pendingCount = 0; // Placeholder
+    this.approvalService.getApprovalRequests({ status: 'pending', limit: 1 }).subscribe({
+      next: (response) => {
+        this.pendingCount = response.total;
+      },
+      error: (error) => {
+        console.error('Fejl ved opdatering af pending count:', error);
+      }
+    });
   }
 
   private addActivity(message: string, type: string) {
@@ -491,17 +199,40 @@ export class App implements OnInit, OnDestroy {
   }
 
   createTestUsers() {
-    // This will be implemented when ApprovalService has the method
-    console.log('Creating test users...');
-    this.addActivity('Test brugere oprettet', 'approved');
-    alert('✅ Test brugere oprettet succesfuldt!');
+    this.approvalService.createTestUsers().subscribe({
+      next: () => {
+        this.addActivity('Test brugere oprettet', 'approved');
+        alert('✅ Test brugere oprettet succesfuldt!');
+      },
+      error: (error) => {
+        console.error('Fejl ved oprettelse af test brugere:', error);
+        this.addActivity('Fejl ved oprettelse af test brugere', 'rejected');
+        alert(`❌ Fejl ved oprettelse: ${error.message}`);
+      }
+    });
   }
 
   createSampleRequest() {
-    // This will be implemented when ApprovalService is ready
-    console.log('Creating sample request...');
-    this.addActivity('Eksempel anmodning oprettet', 'pending');
-    alert('✅ Eksempel anmodning oprettet!');
+    const sampleRequest = {
+      title: 'Test Anmodning - Kontorudstyr',
+      description: 'Dette er en test anmodning til demonstration af systemet',
+      category: 'IT',
+      priority: 'medium' as any,
+      amount: 5000,
+      approver_id: 1
+    };
+
+    this.approvalService.createApprovalRequest(sampleRequest, 2).subscribe({
+      next: (request) => {
+        this.addActivity(`Eksempel anmodning oprettet: ${request.title}`, 'pending');
+        this.refreshData();
+        alert('✅ Eksempel anmodning oprettet!');
+      },
+      error: (error) => {
+        console.error('Fejl ved oprettelse af eksempel anmodning:', error);
+        alert('❌ Fejl ved oprettelse. Opret først test brugere.');
+      }
+    });
   }
 
   viewApiDocs() {
