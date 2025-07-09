@@ -1,1 +1,192 @@
-<p>create-request works!</p>
+<!-- src/app/components/create-request/create-request.html -->
+<div class="create-request">
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+        ✅ {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        ❌ {{ errorMessage }}
+    </div>
+
+    <!-- Main Form -->
+    <form [formGroup]="requestForm" (ngSubmit)="onSubmit()">
+
+        <!-- Title -->
+        <div class="form-group">
+            <label for="title" class="form-label">Titel *</label>
+            <input type="text" id="title" class="form-control" formControlName="title"
+                placeholder="F.eks. Nyt kontorudstyr, IT-udstyr, rejsegodkendelse..."
+                [class.is-invalid]="requestForm.get('title')?.invalid && requestForm.get('title')?.touched">
+            <div *ngIf="requestForm.get('title')?.invalid && requestForm.get('title')?.touched"
+                class="invalid-feedback">
+                Titel er påkrævet
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label for="description" class="form-label">Beskrivelse *</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="4"
+                placeholder="Detaljeret beskrivelse af anmodningen, begrundelse, specifikationer..."
+                [class.is-invalid]="requestForm.get('description')?.invalid && requestForm.get('description')?.touched"></textarea>
+            <div *ngIf="requestForm.get('description')?.invalid && requestForm.get('description')?.touched"
+                class="invalid-feedback">
+                Beskrivelse er påkrævet
+            </div>
+        </div>
+
+        <!-- Category and Priority Row -->
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="category" class="form-label">Kategori *</label>
+                    <select id="category" class="form-control" formControlName="category"
+                        [class.is-invalid]="requestForm.get('category')?.invalid && requestForm.get('category')?.touched">
+                        <option value="">Vælg kategori</option>
+                        <option value="IT">🖥️ IT & Teknologi</option>
+                        <option value="Indkøb">🛒 Indkøb & Procurement</option>
+                        <option value="HR">👥 Personal & HR</option>
+                        <option value="Økonomi">💰 Økonomi & Budget</option>
+                        <option value="Drift">🔧 Drift & Vedligeholdelse</option>
+                        <option value="Rejse">✈️ Rejse & Transport</option>
+                        <option value="Uddannelse">📚 Uddannelse & Kurser</option>
+                        <option value="Andet">📋 Andet</option>
+                    </select>
+                    <div *ngIf="requestForm.get('category')?.invalid && requestForm.get('category')?.touched"
+                        class="invalid-feedback">
+                        Kategori er påkrævet
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="priority" class="form-label">Prioritet *</label>
+                    <select id="priority" class="form-control" formControlName="priority">
+                        <option value="low">🟢 Lav - Ikke kritisk</option>
+                        <option value="medium">🟡 Mellem - Normal hastighed</option>
+                        <option value="high">🟠 Høj - Vigtigt</option>
+                        <option value="urgent">🔴 Akut - Kritisk</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount and Due Date Row -->
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="amount" class="form-label">Beløb (DKK)</label>
+                    <input type="number" id="amount" class="form-control" formControlName="amount" placeholder="0"
+                        min="0" step="1"
+                        [class.is-invalid]="requestForm.get('amount')?.invalid && requestForm.get('amount')?.touched">
+                    <small class="form-text">Lad stå tom hvis ikke relevant</small>
+                    <div *ngIf="requestForm.get('amount')?.invalid && requestForm.get('amount')?.touched"
+                        class="invalid-feedback">
+                        Beløb skal være positivt
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-col">
+                <div class="form-group">
+                    <label for="due_date" class="form-label">Ønsket frist</label>
+                    <input type="date" id="due_date" class="form-control" formControlName="due_date" [min]="minDate">
+                    <small class="form-text">Hvornår skal dette være færdigt?</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approver Selection -->
+        <div class="form-group">
+            <label for="approver" class="form-label">Godkender *</label>
+            <select id="approver" class="form-control" formControlName="approver_id"
+                [class.is-invalid]="requestForm.get('approver_id')?.invalid && requestForm.get('approver_id')?.touched">
+                <option value="">Vælg godkender</option>
+                <option *ngFor="let user of users" [value]="user.id">
+                    {{ user.name }} - {{ user.role }}
+                    <span *ngIf="user.department">({{ user.department }})</span>
+                </option>
+            </select>
+            <div *ngIf="requestForm.get('approver_id')?.invalid && requestForm.get('approver_id')?.touched"
+                class="invalid-feedback">
+                Godkender er påkrævet
+            </div>
+            <small class="form-text">Vælg den person der skal godkende denne anmodning</small>
+        </div>
+
+        <!-- External Reference (Optional) -->
+        <div class="form-group">
+            <label for="external_reference" class="form-label">Ekstern reference</label>
+            <input type="text" id="external_reference" class="form-control" formControlName="external_reference"
+                placeholder="F.eks. sagsnummer, fakturanummer, kontrakt ID...">
+            <small class="form-text">Valgfrit - reference til eksisterende sager eller dokumenter</small>
+        </div>
+
+        <!-- Confidentiality Level -->
+        <div class="form-group">
+            <label for="confidentiality_level" class="form-label">Fortrolighedsniveau</label>
+            <select id="confidentiality_level" class="form-control" formControlName="confidentiality_level">
+                <option value="normal">🔓 Normal - Standard adgang</option>
+                <option value="confidential">🔒 Fortroligt - Begrænset adgang</option>
+                <option value="secret">🔐 Hemmeligt - Højeste sikkerhed</option>
+            </select>
+            <small class="form-text">Vælg passende sikkerhedsniveau for denne anmodning</small>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="!requestForm.valid || submitting">
+                <span *ngIf="submitting">⏳ Opretter...</span>
+                <span *ngIf="!submitting">📤 Opret Godkendelsesanmodning</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-lg" (click)="resetForm()" [disabled]="submitting">
+                🔄 Nulstil
+            </button>
+        </div>
+
+        <!-- Form Validation Summary -->
+        <div *ngIf="!requestForm.valid && requestForm.touched" class="alert alert-warning mt-3">
+            <strong>⚠️ Manglende oplysninger:</strong>
+            <ul class="mb-0 mt-2">
+                <li *ngIf="requestForm.get('title')?.invalid">Titel er påkrævet</li>
+                <li *ngIf="requestForm.get('description')?.invalid">Beskrivelse er påkrævet</li>
+                <li *ngIf="requestForm.get('category')?.invalid">Kategori skal vælges</li>
+                <li *ngIf="requestForm.get('approver_id')?.invalid">Godkender skal vælges</li>
+                <li *ngIf="requestForm.get('amount')?.invalid">Beløb skal være positivt (eller tomt)</li>
+            </ul>
+        </div>
+    </form>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+        <div class="card">
+            <div class="card-header">
+                <h4>🚀 Hurtig Start</h4>
+            </div>
+            <div class="card-body">
+                <p>Mangler test data? Opret hurtig test setup:</p>
+                <div class="d-flex gap-2">
+                    <button (click)="createTestUsers()" class="btn btn-outline btn-sm" [disabled]="creatingTestData">
+                        <span *ngIf="creatingTestData">⏳</span>
+                        <span *ngIf="!creatingTestData">👥</span>
+                        Opret Test Brugere
+                    </button>
+
+                    <button (click)="fillSampleData()" class="btn btn-outline btn-sm">
+                        📝 Udfyld Eksempel Data
+                    </button>
+
+                    <button (click)="viewFormHelp()" class="btn btn-outline btn-sm">
+                        ❓ Hjælp
+                    </button>
+                </div>
+                <small class="text-muted d-block mt-2">
+                    Test brugere: Manager Jensen (godkender) og Medarbejder Hansen (anmoder)
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,1 +1,200 @@
-<p>approval-list works!</p>
+<!-- src/app/components/approval-list/approval-list.html -->
+<div class="approval-list">
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="filters-row">
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select [(ngModel)]="filters.status" (change)="onFilterChange()" class="form-control">
+                    <option value="">Alle statuser</option>
+                    <option value="pending">Afventer</option>
+                    <option value="approved">Godkendt</option>
+                    <option value="rejected">Afvist</option>
+                    <option value="escalated">Eskaleret</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Prioritet</label>
+                <select [(ngModel)]="filters.priority" (change)="onFilterChange()" class="form-control">
+                    <option value="">Alle prioriteter</option>
+                    <option value="urgent">Akut</option>
+                    <option value="high">Høj</option>
+                    <option value="medium">Mellem</option>
+                    <option value="low">Lav</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <select [(ngModel)]="filters.category" (change)="onFilterChange()" class="form-control">
+                    <option value="">Alle kategorier</option>
+                    <option value="IT">IT & Teknologi</option>
+                    <option value="Indkøb">Indkøb</option>
+                    <option value="HR">Personal & HR</option>
+                    <option value="Økonomi">Økonomi</option>
+                    <option value="Drift">Drift & Vedligeholdelse</option>
+                    <option value="Andet">Andet</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Søg</label>
+                <input type="text" [(ngModel)]="filters.search" (input)="onSearchChange()"
+                    placeholder="Søg i titel, beskrivelse..." class="form-control">
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Indlæser anmodninger...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && requests.length === 0" class="card">
+        <div class="card-body text-center">
+            <h3>📭 Ingen anmodninger fundet</h3>
+            <p>Der er ingen godkendelsesanmodninger der matcher dine filtre.</p>
+            <button class="btn btn-primary" (click)="clearFilters()">
+                🔄 Nulstil filtre
+            </button>
+        </div>
+    </div>
+
+    <!-- Approval requests grid -->
+    <div class="approval-grid" *ngIf="!loading && requests.length > 0">
+        <div *ngFor="let request of requests" class="card approval-card" [class]="'priority-' + request.priority"
+            [class.overdue]="isOverdue(request.due_date)">
+
+            <!-- Card Header -->
+            <div class="card-header">
+                <div class="header-main">
+                    <h3 class="card-title">{{ request.title }}</h3>
+                    <small class="reference-number">{{ request.reference_number }}</small>
+                </div>
+                <div class="header-actions">
+                    <span class="badge" [class]="'badge-' + request.status">
+                        {{ getStatusText(request.status) }}
+                    </span>
+                    <span class="badge priority-badge" [class]="'priority-' + request.priority">
+                        {{ getPriorityText(request.priority) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+                <p class="description">{{ request.description }}</p>
+
+                <!-- Request Details Grid -->
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <strong>👤 Anmoder:</strong>
+                        <span>{{ request.requester.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>✅ Godkender:</strong>
+                        <span>{{ request.approver.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>📁 Kategori:</strong>
+                        <span>{{ getCategoryText(request.category) }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="request.amount">
+                        <strong>💰 Beløb:</strong>
+                        <span>{{ formatAmount(request.amount) }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>📅 Oprettet:</strong>
+                        <span>{{ request.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="request.due_date">
+                        <strong>⏰ Frist:</strong>
+                        <span [class.overdue-text]="isOverdue(request.due_date)">
+                            {{ request.due_date | date:'dd/MM/yyyy' }}
+                            <span *ngIf="isOverdue(request.due_date)" class="overdue-badge">
+                                ({{ calculateDaysOverdue(request.due_date) }} dage forsinket)
+                            </span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Comments preview -->
+                <div *ngIf="request.comments && request.comments.length > 0" class="comments-preview">
+                    <strong>💬 Seneste kommentar:</strong>
+                    <div class="comment-item">
+                        <small>{{ request.comments[request.comments.length - 1].user.name }} -
+                            {{ request.comments[request.comments.length - 1].created_at | date:'dd/MM HH:mm' }}</small>
+                        <p>{{ request.comments[request.comments.length - 1].content }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer" *ngIf="request.status === 'pending'">
+                <div class="action-buttons">
+                    <button (click)="updateRequest(request.id, 'approved')" class="btn btn-success btn-sm"
+                        [disabled]="updating === request.id">
+                        <span *ngIf="updating === request.id">⏳</span>
+                        <span *ngIf="updating !== request.id">✅</span>
+                        Godkend
+                    </button>
+
+                    <button (click)="updateRequest(request.id, 'rejected')" class="btn btn-danger btn-sm"
+                        [disabled]="updating === request.id">
+                        <span *ngIf="updating === request.id">⏳</span>
+                        <span *ngIf="updating !== request.id">❌</span>
+                        Afvis
+                    </button>
+
+                    <button (click)="showCommentDialog(request)" class="btn btn-secondary btn-sm">
+                        💬 Kommentar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Escalated status info -->
+            <div class="card-footer" *ngIf="request.status === 'escalated'">
+                <div class="alert alert-warning">
+                    ⚠️ Denne anmodning er blevet eskaleret og afventer handling fra højere niveau.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="!loading && totalRequests > requests.length">
+        <div class="pagination-info">
+            Viser {{ requests.length }} af {{ totalRequests }} anmodninger
+        </div>
+        <button class="btn btn-primary" (click)="loadMore()" [disabled]="loadingMore">
+            <span *ngIf="loadingMore">⏳ Indlæser...</span>
+            <span *ngIf="!loadingMore">📄 Indlæs flere</span>
+        </button>
+    </div>
+</div>
+
+<!-- Comment Dialog -->
+<div class="modal-overlay" *ngIf="showingCommentDialog" (click)="closeCommentDialog()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>💬 Tilføj Kommentar</h3>
+            <button class="btn btn-sm btn-secondary" (click)="closeCommentDialog()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Kommentar til: {{ selectedRequest?.title }}</label>
+                <textarea [(ngModel)]="commentText" class="form-control" rows="4"
+                    placeholder="Skriv din kommentar her..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeCommentDialog()">Annuller</button>
+            <button class="btn btn-primary" (click)="addComment()" [disabled]="!commentText.trim()">
+                💬 Tilføj Kommentar
+            </button>
+        </div>
+    </div>
+</div>

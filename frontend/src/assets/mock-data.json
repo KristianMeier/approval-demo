@@ -1,0 +1,284 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "email": "manager@gov.dk",
+        "name": "Manager Jensen",
+        "role": "Manager",
+        "department": "Administration",
+        "phone": "+45 12345678",
+        "is_active": true,
+        "created_at": "2024-01-15T10:00:00Z",
+        "last_login": "2024-03-20T14:30:00Z"
+      },
+      {
+        "id": 2,
+        "email": "employee@gov.dk",
+        "name": "Medarbejder Hansen",
+        "role": "Employee",
+        "department": "IT",
+        "phone": "+45 87654321",
+        "is_active": true,
+        "created_at": "2024-01-15T10:00:00Z",
+        "last_login": "2024-03-20T09:15:00Z"
+      },
+      {
+        "id": 3,
+        "email": "senior@gov.dk",
+        "name": "Senior Manager Petersen",
+        "role": "Senior Manager",
+        "department": "Direktion",
+        "phone": "+45 11223344",
+        "is_active": true,
+        "created_at": "2024-01-10T08:00:00Z",
+        "last_login": "2024-03-19T16:45:00Z"
+      },
+      {
+        "id": 4,
+        "email": "finance@gov.dk",
+        "name": "Økonomi Chef Nielsen",
+        "role": "Manager",
+        "department": "Økonomi",
+        "phone": "+45 55667788",
+        "is_active": true,
+        "created_at": "2024-01-20T09:00:00Z",
+        "last_login": "2024-03-20T11:30:00Z"
+      }
+    ],
+    "approvalRequests": [
+      {
+        "id": 1,
+        "title": "Nyt kontorudstyr til administration",
+        "description": "Vi har brug for nye kontormøbler til administrationsafdelingen. De nuværende møbler er slidte og ikke-ergonomiske. Dette inkluderer 5 nye skriveborde og kontorstole.",
+        "category": "Indkøb",
+        "priority": "medium",
+        "status": "pending",
+        "amount": 45000,
+        "currency": "DKK",
+        "requester_id": 2,
+        "approver_id": 1,
+        "created_at": "2024-03-18T10:30:00Z",
+        "due_date": "2024-03-30T17:00:00Z",
+        "reference_number": "REQ-2024-001",
+        "external_reference": "PO-2024-123",
+        "confidentiality_level": "normal",
+        "requester": {
+          "id": 2,
+          "email": "employee@gov.dk",
+          "name": "Medarbejder Hansen",
+          "role": "Employee",
+          "department": "IT"
+        },
+        "approver": {
+          "id": 1,
+          "email": "manager@gov.dk",
+          "name": "Manager Jensen",
+          "role": "Manager",
+          "department": "Administration"
+        },
+        "comments": [
+          {
+            "id": 1,
+            "content": "Har I overvejet at genbruge nogle af de eksisterende møbler?",
+            "is_internal": false,
+            "user_id": 1,
+            "created_at": "2024-03-19T09:00:00Z",
+            "user": {
+              "id": 1,
+              "name": "Manager Jensen",
+              "role": "Manager"
+            }
+          },
+          {
+            "id": 2,
+            "content": "Vi har undersøgt det, men de er desværre for slidte til at kunne renoveres økonomisk.",
+            "is_internal": false,
+            "user_id": 2,
+            "created_at": "2024-03-19T10:30:00Z",
+            "user": {
+              "id": 2,
+              "name": "Medarbejder Hansen",
+              "role": "Employee"
+            }
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Urgent: Server udskiftning",
+        "description": "Vores primære database server viser tegn på hardware fejl. Vi skal have en ny server ASAP for at undgå nedetid.",
+        "category": "IT",
+        "priority": "urgent",
+        "status": "approved",
+        "amount": 125000,
+        "currency": "DKK",
+        "requester_id": 2,
+        "approver_id": 3,
+        "created_at": "2024-03-15T14:00:00Z",
+        "approved_at": "2024-03-15T16:30:00Z",
+        "due_date": "2024-03-20T17:00:00Z",
+        "reference_number": "REQ-2024-002",
+        "confidentiality_level": "confidential",
+        "requester": {
+          "id": 2,
+          "email": "employee@gov.dk",
+          "name": "Medarbejder Hansen",
+          "role": "Employee",
+          "department": "IT"
+        },
+        "approver": {
+          "id": 3,
+          "email": "senior@gov.dk",
+          "name": "Senior Manager Petersen",
+          "role": "Senior Manager",
+          "department": "Direktion"
+        },
+        "comments": []
+      },
+      {
+        "id": 3,
+        "title": "Kursus i projektledelse",
+        "description": "Ansøgning om deltagelse i certificeret projektledelseskursus (PRINCE2). Dette vil forbedre mine kompetencer i at lede større IT-projekter.",
+        "category": "Uddannelse",
+        "priority": "low",
+        "status": "pending",
+        "amount": 15000,
+        "currency": "DKK",
+        "requester_id": 2,
+        "approver_id": 1,
+        "created_at": "2024-03-20T08:00:00Z",
+        "due_date": "2024-04-15T17:00:00Z",
+        "reference_number": "REQ-2024-003",
+        "confidentiality_level": "normal",
+        "requester": {
+          "id": 2,
+          "email": "employee@gov.dk",
+          "name": "Medarbejder Hansen",
+          "role": "Employee",
+          "department": "IT"
+        },
+        "approver": {
+          "id": 1,
+          "email": "manager@gov.dk",
+          "name": "Manager Jensen",
+          "role": "Manager",
+          "department": "Administration"
+        },
+        "comments": []
+      },
+      {
+        "id": 4,
+        "title": "Årlig budgetrevision",
+        "description": "Anmodning om godkendelse af revideret årsbudget for IT-afdelingen. Inkluderer justeringer baseret på Q1 resultater.",
+        "category": "Økonomi",
+        "priority": "high",
+        "status": "rejected",
+        "amount": 2500000,
+        "currency": "DKK",
+        "requester_id": 4,
+        "approver_id": 3,
+        "created_at": "2024-03-10T11:00:00Z",
+        "approved_at": "2024-03-12T15:00:00Z",
+        "due_date": "2024-03-25T17:00:00Z",
+        "reference_number": "REQ-2024-004",
+        "confidentiality_level": "secret",
+        "requester": {
+          "id": 4,
+          "email": "finance@gov.dk",
+          "name": "Økonomi Chef Nielsen",
+          "role": "Manager",
+          "department": "Økonomi"
+        },
+        "approver": {
+          "id": 3,
+          "email": "senior@gov.dk",
+          "name": "Senior Manager Petersen",
+          "role": "Senior Manager",
+          "department": "Direktion"
+        },
+        "comments": [
+          {
+            "id": 3,
+            "content": "Budgettet overstiger de aftalte rammer med 15%. Dette skal revideres.",
+            "is_internal": false,
+            "user_id": 3,
+            "created_at": "2024-03-12T15:00:00Z",
+            "user": {
+              "id": 3,
+              "name": "Senior Manager Petersen",
+              "role": "Senior Manager"
+            }
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Vedligeholdelse af parkering",
+        "description": "Parkeringspladsen har flere huller og revner der skal repareres før vinteren.",
+        "category": "Drift",
+        "priority": "medium",
+        "status": "pending",
+        "amount": 75000,
+        "currency": "DKK",
+        "requester_id": 2,
+        "approver_id": 4,
+        "created_at": "2024-03-19T13:00:00Z",
+        "due_date": "2024-04-30T17:00:00Z",
+        "reference_number": "REQ-2024-005",
+        "confidentiality_level": "normal",
+        "requester": {
+          "id": 2,
+          "email": "employee@gov.dk",
+          "name": "Medarbejder Hansen",
+          "role": "Employee",
+          "department": "IT"
+        },
+        "approver": {
+          "id": 4,
+          "email": "finance@gov.dk",
+          "name": "Økonomi Chef Nielsen",
+          "role": "Manager",
+          "department": "Økonomi"
+        },
+        "comments": []
+      }
+    ],
+    "systemHealth": {
+      "status": "healthy",
+      "service": "running",
+      "database": "healthy",
+      "websocket_connections": 0,
+      "timestamp": "2024-03-20T15:00:00Z"
+    },
+    "websocketStats": {
+      "total_connections": 0,
+      "unique_users": 0,
+      "messages_sent": 0,
+      "role_distribution": {
+        "admin": 0,
+        "manager": 0,
+        "employee": 0
+      },
+      "active_users": []
+    },
+    "approvalStats": {
+      "total_requests": 5,
+      "pending_requests": 3,
+      "approved_requests": 1,
+      "rejected_requests": 1,
+      "avg_processing_time_hours": 48,
+      "requests_by_priority": {
+        "urgent": 1,
+        "high": 1,
+        "medium": 2,
+        "low": 1
+      },
+      "requests_by_category": {
+        "IT": 1,
+        "Indkøb": 1,
+        "Økonomi": 1,
+        "Drift": 1,
+        "Uddannelse": 1
+      }
+    }
+  }
