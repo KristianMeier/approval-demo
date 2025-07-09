@@ -26,8 +26,12 @@ export class ApprovalService {
   private useMockData = false;
 
   constructor(private http: HttpClient) {
-    // Check if backend is available on service initialization
-    this.checkBackendAvailability();
+    // Start with mock data by default
+    this.useMockData = true;
+    console.log('📊 Starter med mock data');
+    
+    // Check backend availability after a short delay
+    setTimeout(() => this.checkBackendAvailability(), 1000);
   }
 
   private checkBackendAvailability() {

@@ -32,9 +32,12 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initializeApp();
-    this.setupWebSocket();
-    this.loadSystemInfo();
-    this.startPeriodicUpdates();
+    // Delay WebSocket connection to avoid immediate failures
+    setTimeout(() => {
+      this.setupWebSocket();
+      this.loadSystemInfo();
+      this.startPeriodicUpdates();
+    }, 500);
   }
 
   ngOnDestroy() {
