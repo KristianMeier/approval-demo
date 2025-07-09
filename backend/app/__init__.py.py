@@ -1,6 +1,6 @@
 # backend/app/__init__.py
 """
-Politisk Godkendelsessystem API
+Dst Approval Flows API
 
 Et sikkert, on-premise system til håndtering af godkendelsesworkflows
 i politiske kontorer og statslige institutioner.

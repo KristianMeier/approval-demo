@@ -2,11 +2,14 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 from typing import Optional, List
 import asyncio
 import logging
 import os
+import json
 from datetime import datetime
 
 from . import crud, models, schemas
@@ -32,7 +35,7 @@ except Exception as e:
 
 # Create FastAPI app
 app = FastAPI(
-    title="Politisk Godkendelsessystem API",
+    title="Dst Approval Flows API",
     description="Sikker API til håndtering af godkendelsesworkflows i politiske kontorer",
     version="1.0.0",
     docs_url="/docs",
@@ -59,7 +62,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup"""
-    logger.info("Starting Politisk Godkendelsessystem API")
+    logger.info("Starting Dst Approval Flows API")
     
     # Start WebSocket ping/pong handler
     asyncio.create_task(manager.handle_ping_pong())
@@ -76,7 +79,7 @@ async def shutdown_event():
 def read_root():
     """Root endpoint med system information"""
     return {
-        "message": "Politisk Godkendelsessystem API",
+        "message": "Dst Approval Flows API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",
@@ -88,7 +91,7 @@ def health_check(db: Session = Depends(get_db)):
     """Sundhedstjek for systemet"""
     try:
         # Test database connection
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db_status = "healthy"
     except Exception as e:
         logger.error(f"Database health check failed: {e}")

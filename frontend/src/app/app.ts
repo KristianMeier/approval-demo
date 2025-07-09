@@ -50,7 +50,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   private initializeApp() {
-    console.log('🏛️ Politisk Godkendelsessystem starter op...');
+    console.log('Dst Approval Flows starter op...');
     this.addActivity('System startet', 'info');
   }
 

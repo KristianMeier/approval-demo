@@ -1,7 +1,7 @@
 {
   "name": "approval-frontend",
   "version": "1.0.0",
-  "description": "Frontend til Politisk Godkendelsessystem",
+  "description": "Frontend til Dst Approval Flows",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --port 4200",
