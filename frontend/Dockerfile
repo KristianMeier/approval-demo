@@ -4,7 +4,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install Angular CLI globally
-RUN npm install -g @angular/cli
+RUN npm install -g @angular/cli@17
 
 # Copy package files
 COPY package*.json ./
